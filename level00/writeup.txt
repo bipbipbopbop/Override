@@ -1,0 +1,17 @@
+The binary level00 prompt us for a password.
+A quick static analysis show us that a `scanf("%d", int)` is done, and the int is then compared with the litteral value '5276'.
+this condition lead us to a call to `system("/bin/sh")`.
+
+level00@OverRide:~$ ./level00
+***********************************
+*            -Level00 -           *
+***********************************
+Password:5276
+
+Authenticated!
+$ whoami
+level01
+$ cd ../level01
+$ cat .pass
+uSq2ehEGT6c9S24zbshexZQBXUGrncxn5sD5QfGL
+$
