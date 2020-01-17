@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdint.h>
 
 void clear_stdin(void)
 {
@@ -21,7 +22,7 @@ unsigned int get_unum(void)
     return res;
 }
 
-int		store_number(char *buf)
+int		store_number(int *buf)
 {
 	int	a;
 	int	b;
@@ -38,7 +39,7 @@ int		store_number(char *buf)
 	//to simplify, all numbers that are multiple of 3 are bad index
 	if (edx_tmp != 0 && ((unsigned)a >> 24) != 0xb7)
 	{
-		buf[b << 2] = a;
+		buf[b] = a;
 		return 0;
 	}
 
@@ -48,13 +49,13 @@ int		store_number(char *buf)
 	return 1;
 }
 
-int		read_number(char *buf)
+int		read_number(int *buf)
 {
 	int		a = 0;
 
 	printf(" Index: ");
 	a = get_unum();
-	printf(" Number at data[%u] is %u\n", a, buf[a << 2]);
+	printf(" Number at data[%u] is %u\n", a, buf[a]);
 	return 0;
 }
 
@@ -63,7 +64,7 @@ int		main(int ac, char **av)
 	// 4 bytes canary
 	char	cmd[20] = {};// manually set to zero, 4 bytes per 4 bytes
 	int		c6 = 0;
-	char	buf[100] = {};// rep stos
+	int 	buf[25] = {};// rep stos
 	char	**a = av;
 	char	**b = av + 1;
 
